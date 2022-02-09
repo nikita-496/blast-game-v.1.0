@@ -1,5 +1,6 @@
 const expect = require('chai').expect;
 
+const { globalValues } = require('../src/gameMenager');
 const { defineCoords } = require('../src/js/utilities/adjacentTile/defineCoords');
 const { filterCoords } = require('../src/js/utilities/adjacentTile/filterCoords');
 
@@ -9,7 +10,7 @@ const activeTile = {
   type: 'Green',
   status: 'active',
 };
-cellSize = 1;
+cellSize = globalValues.CELL_SIZE;
 
 describe('define coordinate adjacent tile', function () {
   it('should currectly report adjacent coordianates', function () {
