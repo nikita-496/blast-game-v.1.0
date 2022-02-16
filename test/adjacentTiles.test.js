@@ -1,36 +1,29 @@
 const expect = require('chai').expect;
 
-const { globalValues } = require('../src/gameMenager');
-const { defineCoords } = require('../src/js/utilities/adjacentTile/defineCoords');
-const { filterCoords } = require('../src/js/utilities/adjacentTile/filterCoords');
+const { modules } = require('../src/js/utilities/adjacentTile/importedModules');
+const { mock } = require('../src/js/utilities/utilitiesStore');
 
-const activeTile = {
-  x: 4,
-  y: 1,
-  type: 'Green',
-  status: 'active',
-};
-cellSize = globalValues.CELL_SIZE;
+const clickedTile = modules.setStatusClickedTile(mock.GAME_FIELD, 1, 3);
+cellSize = modules.globalValues.CELL_SIZE;
+const adjacentCoords = modules.defineCoords(clickedTile.coords.x, clickedTile.coords.y, cellSize);
 
 describe('define coordinate adjacent tile', function () {
   it('should currectly report adjacent coordianates', function () {
-    expect(defineCoords(activeTile.x, activeTile.y, cellSize))
+    expect(adjacentCoords)
       .to.be.an('array')
       .that.to.deep.equal([
-        { x: 4, y: 2 },
-        { x: 5, y: 1 },
-        { x: 4, y: 0 },
-        { x: 3, y: 1 },
+        { x: 1, y: 4 },
+        { x: 2, y: 3 },
+        { x: 1, y: 2 },
+        { x: 0, y: 3 },
       ]);
   });
 
-  const adjacentCoords = defineCoords(activeTile.x, activeTile.y, cellSize);
-
   it('should include adjacent coordinates within the game field', function () {
-    expect(filterCoords(adjacentCoords)).to.be.deep.equal([
-      { x: 4, y: 2 },
-      { x: 5, y: 1 },
-      { x: 3, y: 1 },
+    expect(modules.filterCoords(adjacentCoords)).to.be.deep.equal([
+      { x: 1, y: 4 },
+      { x: 2, y: 3 },
+      { x: 1, y: 2 },
     ]);
   });
 });
@@ -38,36 +31,32 @@ describe('define coordinate adjacent tile', function () {
 describe('define same type tiles', function () {
   const { defineType } = require('../src/js/utilities/adjacentTile/defineType');
 
-  const adjacentCoords = defineCoords(activeTile.x, activeTile.y, cellSize);
-  const adjacentTiles = filterCoords(adjacentCoords);
+  const adjacentTiles = modules.filterCoords(adjacentCoords);
+  const filteredAdjacentTiles = modules.setStatusAdjacentTiles(adjacentTiles);
 
   it('should contain an area of ​​tiles of the same type', function () {
-    adjacentTiles.forEach((adjacentTile, index) => {
-      if (index === 2) {
-        adjacentTile.type = 'Yellow';
-        adjacentTile.status = 'adjacent';
-        return adjacentTile;
-      }
-      adjacentTile.type = 'Green';
-      adjacentTile.status = 'adjacent';
-      return adjacentTile;
-    });
-
-    expect(defineType(activeTile, adjacentTiles)).to.be.deep.equal([
-      { x: 4, y: 2, type: 'Green', status: 'adjacent' },
-      { x: 5, y: 1, type: 'Green', status: 'adjacent' },
+    expect(defineType(clickedTile, filteredAdjacentTiles)).to.be.deep.equal([
+      {
+        type: 'Red',
+        coords: { x: 2, y: 3 },
+        status: 'adjacent',
+      },
     ]);
   });
-  const {
-    createListSimilarTiles,
-  } = require('../src/js/utilities/adjacentTile/createListSimilarTiles');
+
+  const sameTypeTiles = defineType(clickedTile, filteredAdjacentTiles);
   it('should length list of same type tiles equal number of same tile', function () {
-    expect(
-      createListSimilarTiles(activeTile, defineType(activeTile, adjacentTiles))
-    ).to.be.deep.equal([
-      { x: 4, y: 1, type: 'Green', status: 'active' },
-      { x: 4, y: 2, type: 'Green', status: 'adjacent' },
-      { x: 5, y: 1, type: 'Green', status: 'adjacent' },
+    expect(modules.createListSimilarTiles(clickedTile, sameTypeTiles)).to.be.deep.equal([
+      {
+        type: 'Red',
+        coords: { x: 1, y: 3 },
+        status: 'active',
+      },
+      {
+        type: 'Red',
+        coords: { x: 2, y: 3 },
+        status: 'adjacent',
+      },
     ]);
   });
 });
