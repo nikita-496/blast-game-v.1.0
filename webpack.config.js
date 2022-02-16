@@ -1,4 +1,5 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 let mode = 'development';
 if (process.env.NODE_ENV === 'production') {
@@ -8,6 +9,10 @@ if (process.env.NODE_ENV === 'production') {
 module.exports = {
   mode,
   entry: './src/js/index.js',
+  output: {
+    assetModuleFilename: 'assets/[hash][ext][query]',
+    clean: true,
+  },
   plugins: [
     new HtmlWebpackPlugin({
       templateContent: `
@@ -16,12 +21,27 @@ module.exports = {
           <title>Hello Cocos2d-JS</title>
       </head>
       <body>
-          <h1>Шаблон отрисовался</h1>
+        <canvas id="gameCanvas" width="1366" height="700"></canvas>
+        <script src="libs/cocos2d-js-v3.13-lite.js"> </script>
       </body>
       </html>
       `,
       filename: 'index.html',
       inject: 'body',
     }),
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: './libs/cocos2d-html5/cocos2d-js-v3.13-lite.js', to: 'libs' },
+        { from: './project.json', to: './' },
+      ],
+    }),
   ],
+  module: {
+    rules: [
+      {
+        test: /\.(png|svg|jpe?g|gif)$/i,
+        type: 'asset',
+      },
+    ],
+  },
 };
