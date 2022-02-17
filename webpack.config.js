@@ -8,7 +8,7 @@ if (process.env.NODE_ENV === 'production') {
 
 module.exports = {
   mode,
-  entry: './src/js/index.js',
+  entry: ['@babel/polyfill', './src/js/index.js'],
   output: {
     assetModuleFilename: 'assets/[hash][ext][query]',
     clean: true,
@@ -41,6 +41,18 @@ module.exports = {
       {
         test: /\.(png|svg|jpe?g|gif)$/i,
         type: 'asset',
+      },
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: [
+          {
+            loader: 'babel-loader',
+            options: {
+              presets: ['@babel/preset-env'],
+            },
+          },
+        ],
       },
     ],
   },
